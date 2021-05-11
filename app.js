@@ -37,7 +37,7 @@ fs.readdir(importFolder, (err, files) => {
         const flat = ws.flat(2);
         const filtered = flat.filter(Boolean);
         crypto.forEach((coin, i) => {
-          index = filtered.findIndex(x => x = coin.symbol.toString());
+          index = filtered.findIndex(x => x === coin.symbol.toString());
           console.log(coin.symbol);
           console.log(index);
         });

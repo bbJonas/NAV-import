@@ -38,8 +38,13 @@ fs.readdir(importFolder, (err, files) => {
         const filtered = flat.filter(Boolean);
         crypto.forEach((coin, i) => {
           index = filtered.findIndex(x => x === coin.symbol.toString());
-          console.log(coin.symbol);
-          console.log(index);
+          if (index != -1) {
+            console.log(`found ${coin.name} with index of: ${index}`);
+          } else {
+            console.log(`missing: ${coin.name}`);
+          }
+          // console.log(coin.symbol);
+          // console.log(index);
         });
 
     })

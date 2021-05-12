@@ -18,7 +18,7 @@ const fiat = [
 ];
 
 // Index of crypto and fiat data
-var relIndexCrypto = {num: -1, entryValue: +6, value: +7, percent: +8};
+var relIndexCrypto = {num: -1, entryValue: 5, value: 6, percent: 7};
 var relIndexFiat = {num: -1, value: 3, percent: 4};
 
 //Index of report date
@@ -44,24 +44,32 @@ fs.readdir(importFolder, (err, files) => {
         const flat = ws.flat(2);
         const filtered = flat.filter(Boolean);
         const indexDate = filtered.findIndex(x => x === 'Datum:') - 1;
-        const date = getJsDateFromExcel(filtered[indexDate]);
+        const date = filtered[indexDate];
 
         const reportData = {
           date: date
         };
-        console.log(reportData);
 
         crypto.forEach((coin, i) => {
+          // Find index of coins from crypto-array in report
           index = filtered.findIndex(x => x === coin.symbol.toString());
+          // If a coin is found
           if (index != -1) {
             console.log(`found ${coin.name} with index of: ${index}`);
-
+            // find data by relative index and save to variable
+            var num = filtered[index + relIndexCrypto.num];
+            var entryValue = filtered[index + relIndexCrypto.entryValue]
+            var value = filtered[index + relIndexCrypto.value]
+            var percent = filtered[index + relIndexCrypto.percent]
+            // put variables into reportData Obj
+            reportData[coin.name] = {num: num, entryValue: entryValue, value: value, percent: percent};
           } else {
             console.log(`missing: ${coin.name}`);
           }
 
         });
-
+        //log reportData of at the End of iterating thorugh file
+        console.log(reportData);
     })
   }
 })

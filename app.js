@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 // required external librarys
 const xlsx = require('node-xlsx').default;
+const getJsDateFromExcel = require('xcel-date-to-js');
 
 // Tracked Crypto and FIAT
 const crypto = [
@@ -16,6 +17,13 @@ const fiat = [
   {name: "eur", symbol: 'KK EUR'},
   {name: "usd", symbol: 'KK USD'}
 ];
+
+// Index of crypto and fiat data
+var relIndexCrypto = {num: -1, entryValue: +6, value: +7, percent: +8};
+var relIndexFiat = {num: -1, value: 3, percent: 4};
+
+//Index of report date
+var relIndexDate = 1
 
 //  find working directory
 var appDirectory = path.parse(__filename).dir.normalize();
@@ -36,11 +44,19 @@ fs.readdir(importFolder, (err, files) => {
         const ws = wbBuffer[0].data;
         const flat = ws.flat(2);
         const filtered = flat.filter(Boolean);
+        const indexDate = filtered.findIndex(x => x === 'Datum:') - 1;
+        const date = getJsDateFromExcel(filtered[indexDate]);
+
+        const reportData = {
+          date: date
+        };
+        console.log(reportData);
+
         crypto.forEach((coin, i) => {
           index = filtered.findIndex(x => x === coin.symbol.toString());
           if (index != -1) {
             console.log(`found ${coin.name} with index of: ${index}`);
-            
+
           } else {
             console.log(`missing: ${coin.name}`);
           }

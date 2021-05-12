@@ -3,7 +3,6 @@ const path = require('path');
 const fs = require('fs');
 // required external librarys
 const xlsx = require('node-xlsx').default;
-const getJsDateFromExcel = require('xcel-date-to-js');
 
 // Tracked Crypto and FIAT
 const crypto = [

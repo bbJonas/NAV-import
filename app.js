@@ -40,11 +40,11 @@ fs.readdir(importFolder, (err, files) => {
           index = filtered.findIndex(x => x === coin.symbol.toString());
           if (index != -1) {
             console.log(`found ${coin.name} with index of: ${index}`);
+            
           } else {
             console.log(`missing: ${coin.name}`);
           }
-          // console.log(coin.symbol);
-          // console.log(index);
+
         });
 
     })

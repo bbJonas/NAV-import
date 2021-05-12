@@ -18,8 +18,8 @@ const fiat = [
 ];
 
 // Index of crypto and fiat data
-var relIndexCrypto = {num: -1, entryValue: 5, value: 6, percent: 7};
-var relIndexFiat = {num: -1, value: 3, percent: 4};
+var relIndexCrypto = {num: -1, entryValue: 9, value: 10, sharePct: 11};
+var relIndexFiat = {num: -1, value: 9, sharePct: 11};
 
 //Index of report date
 var relIndexDate = 1
@@ -28,7 +28,8 @@ var relIndexDate = 1
 var appDirectory = path.parse(__filename).dir.normalize();
 //set importFolder and array
 var importFolder = `${appDirectory}\\import`;
-var importArray = [];
+// set array for all report Data
+var allData = [];
 
 //look for sheets in importFolder
 fs.readdir(importFolder, (err, files) => {
@@ -42,13 +43,29 @@ fs.readdir(importFolder, (err, files) => {
         const wbBuffer = xlsx.parse(fs.readFileSync(`${importFolder}/${file}`,{cellDates:true}));
         const ws = wbBuffer[0].data;
         const flat = ws.flat(2);
-        const filtered = flat.filter(Boolean);
+        const filtered = flat //.filter(Boolean); removed for consistency
         const indexDate = filtered.findIndex(x => x === 'Datum:') - 1;
         const date = filtered[indexDate];
 
         const reportData = {
           date: date
         };
+        // find and index all fiat from fiat-array in report
+        fiat.forEach((fiat, i) => {
+          index = filtered.findIndex(x => x === fiat.symbol.toString());
+          // if a fiat is found
+          if (index != -1) {
+            console.log(`found ${fiat.name} with index of: ${index}`);
+            // find data by relative index and save to variable
+            var num = filtered[index + relIndexFiat.num];
+            var value = filtered[index + relIndexFiat.value];
+            var sharePct = filtered[index + relIndexFiat.sharePct];
+            // put variables into reportData Obj
+            reportData[fiat.name] = {num: num, value: value, sharePct: sharePct};
+          } else {
+            console.log(`missing: ${fiat.name}`);
+          }
+        });
 
         crypto.forEach((coin, i) => {
           // Find index of coins from crypto-array in report
@@ -58,27 +75,21 @@ fs.readdir(importFolder, (err, files) => {
             console.log(`found ${coin.name} with index of: ${index}`);
             // find data by relative index and save to variable
             var num = filtered[index + relIndexCrypto.num];
-            var entryValue = filtered[index + relIndexCrypto.entryValue]
-            var value = filtered[index + relIndexCrypto.value]
-            var percent = filtered[index + relIndexCrypto.percent]
+            var entryValue = filtered[index + relIndexCrypto.entryValue];
+            var value = filtered[index + relIndexCrypto.value];
+            var sharePct = filtered[index + relIndexCrypto.sharePct];
+            var entryPrice = entryValue / num;
+            var profitPct = value / entryValue * 100 - 100;
             // put variables into reportData Obj
-            reportData[coin.name] = {num: num, entryValue: entryValue, value: value, percent: percent};
+            reportData[coin.name] = {num: num, entryPrice: entryPrice, entryValue: entryValue, value: value, profitPct: profitPct, sharePct: sharePct};
           } else {
             console.log(`missing: ${coin.name}`);
           }
-
         });
+
+
         //log reportData of at the End of iterating thorugh file
         console.log(reportData);
     })
   }
 })
-
-// importArray.forEach(file => {
-//   //  excel workbook
-//   const wbBuffer = xlsx.parse(fs.readFileSync(`${importFolder}/${file}`));
-//   // target worksheet
-//   const ws = wbBuffer.Sheets["Holdingsreport"];
-//   var data = xlsx.utils.sheet_to_json(ws);
-//   console.log(data);
-// });
